@@ -1,0 +1,7 @@
+app:
+  URL: "http://home.mcom.com/home/welcome.html"
+  timeoutRequest: 10
+  timeoutApp: 180
+  maxDepth: 3
+  maxResults: 500
+  maxErrors: 500
