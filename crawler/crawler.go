@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// crawler struct
 type crawler struct {
 	r       crawlerer.Requester
 	res     chan crawlerer.CrawlResult
@@ -18,6 +19,7 @@ type crawler struct {
 	mu      sync.RWMutex
 }
 
+// NewCrawler func for initialize new crawler struct
 func NewCrawler(r crawlerer.Requester) *crawler {
 	return &crawler{
 		r:       r,
@@ -27,6 +29,7 @@ func NewCrawler(r crawlerer.Requester) *crawler {
 	}
 }
 
+// Scan method for crawler
 func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, depth uint) {
 	// Crutch for have a little more live links
 	if !strings.HasPrefix(url, "http") {
@@ -37,6 +40,7 @@ func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, depth 
 	if depth <= 0 { //Проверяем то, что есть запас по глубине
 		return
 	}
+
 	c.mu.RLock()
 	_, ok := c.visited[url] //Проверяем, что мы ещё не смотрели эту страницу
 	c.mu.RUnlock()
@@ -59,12 +63,15 @@ func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, depth 
 			Title: page.GetTitle(),
 			Url:   url,
 		}
-		for _, link := range page.GetLinks() {
-			go c.Scan(ctx, link, url, depth-1) //На все полученные ссылки запускаем новую рутину сборки
+		if len(page.GetLinks()) > 0 {
+			for _, link := range page.GetLinks() {
+				go c.Scan(ctx, link, url, depth-1) //На все полученные ссылки запускаем новую рутину сборки
+			}
 		}
 	}
 }
 
+// ChanResult method for put result in channel
 func (c *crawler) ChanResult() <-chan crawlerer.CrawlResult {
 	return c.res
 }

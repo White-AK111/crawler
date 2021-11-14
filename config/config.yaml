@@ -5,3 +5,4 @@ app:
   maxDepth: 3
   maxResults: 500
   maxErrors: 500
+  deltaDepth: 2

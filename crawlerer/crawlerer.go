@@ -1,6 +1,8 @@
 package crawlerer
 
-import "context"
+import (
+	"context"
+)
 
 //Crawler - интерфейс (контракт) краулера
 type Crawler interface {
