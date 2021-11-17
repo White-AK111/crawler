@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	// Load config file
 	cfg, err := config.Init()
 	if err != nil {
@@ -21,13 +20,19 @@ func main() {
 	}
 
 	ctxTime, cancelTimeout := context.WithTimeout(context.Background(), cfg.App.TimeoutApp*time.Second)
-	ctxCurr, cancelCurr := crawlerStart(ctxTime, cfg)
+	ctxCurr, cancelCurr := context.WithCancel(ctxTime)
 
-	sigCh := make(chan os.Signal)                         //Создаем канал для приема сигналов
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGUSR1) //Подписываемся на сигнал SIGINT
+	r := crawler.NewRequester(cfg.App.TimeoutRequest * time.Second)
+	cr := crawler.NewCrawler(r)
+
+	go cr.Scan(ctxCurr, cfg.App.URL, cfg.App.URL, &cfg.App.MaxDepth, 1) // Запускаем краулер в отдельной рутине
+	go processResult(ctxCurr, cancelCurr, cr, cfg)                      // Обрабатываем результаты в отдельной рутине
+
+	sigCh := make(chan os.Signal)                                          // Создаем канал для приема сигналов
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGUSR1, syscall.SIGUSR2) // Подписываемся на сигнал SIGINT
 	for {
 		select {
-		case <-ctxCurr.Done(): //Если всё завершили - выходим
+		case <-ctxCurr.Done(): // Если всё завершили - выходим
 			return
 		case sig := <-sigCh:
 			switch sig {
@@ -38,10 +43,14 @@ func main() {
 				return
 			case syscall.SIGUSR1:
 				log.Println("Catch SIGUSR1")
-				cancelCurr()
-				cfg.App.MaxDepth += 2
-				// Restart crawler with new depth
-				ctxCurr, cancelCurr = crawlerStart(ctxTime, cfg)
+				// Increment depth while catch SIGUSR1
+				cfg.ChangeMaxDepth(cfg.App.DeltaDepth)
+				log.Printf("Depth increment set to: %d\n", cfg.App.DeltaDepth)
+			case syscall.SIGUSR2:
+				log.Println("Catch SIGUSR2")
+				// Decrement depth while catch SIGUSR2
+				cfg.ChangeMaxDepth(-cfg.App.DeltaDepth)
+				log.Printf("Depth decrement set to: -%d\n", cfg.App.DeltaDepth)
 			default:
 				log.Println("Catch other signal")
 			}
@@ -56,6 +65,7 @@ func main() {
 	}
 }
 
+// processResult get results of process
 func processResult(ctx context.Context, cancel context.CancelFunc, cr crawlerer.Crawler, cfg *config.Config) {
 	var maxResult, maxErrors = cfg.App.MaxResults, cfg.App.MaxErrors
 	for {
@@ -71,6 +81,10 @@ func processResult(ctx context.Context, cancel context.CancelFunc, cr crawlerer.
 					log.Println("Exit by MaxErrors")
 					return
 				}
+			} else if len(msg.Info) > 0 {
+				cancel()
+				log.Printf("Exit by: %s\n", msg.Info)
+				return
 			} else {
 				maxResult--
 				log.Printf("crawler result: [url: %s] Title: %s\n", msg.Url, msg.Title)
@@ -82,16 +96,4 @@ func processResult(ctx context.Context, cancel context.CancelFunc, cr crawlerer.
 			}
 		}
 	}
-}
-
-// Starter for crawler
-func crawlerStart(ctxMain context.Context, cfg *config.Config) (ctxCurr context.Context, cancelCurr context.CancelFunc) {
-	ctxCurr, cancelCurr = context.WithCancel(ctxMain)
-	r := crawler.NewRequester(cfg.App.TimeoutRequest * time.Second)
-	cr := crawler.NewCrawler(r)
-
-	go cr.Scan(ctxCurr, cfg.App.URL, cfg.App.URL, cfg.App.MaxDepth) //Запускаем краулер в отдельной рутине
-	go processResult(ctxCurr, cancelCurr, cr, cfg)                  //Обрабатываем результаты в отдельной рутине
-
-	return ctxCurr, cancelCurr
 }

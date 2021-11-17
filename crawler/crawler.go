@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"context"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/t0pep0/GB_best_go1/crawlerer"
 	"io"
@@ -11,32 +12,58 @@ import (
 	"time"
 )
 
+// crawler struct
 type crawler struct {
 	r       crawlerer.Requester
 	res     chan crawlerer.CrawlResult
 	visited map[string]struct{}
 	mu      sync.RWMutex
+	wg      *sync.WaitGroup
 }
 
+// NewCrawler func for initialize new crawler struct
 func NewCrawler(r crawlerer.Requester) *crawler {
-	return &crawler{
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	crawler := &crawler{
 		r:       r,
 		res:     make(chan crawlerer.CrawlResult),
 		visited: make(map[string]struct{}),
 		mu:      sync.RWMutex{},
+		wg:      &wg,
 	}
+
+	go func() {
+		wg.Wait()
+		crawler.ToChanResult(crawlerer.CrawlResult{
+			Info: "All URL's scanned",
+		})
+	}()
+
+	return crawler
 }
 
-func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, depth uint) {
+func (c *crawler) ToChanResult(crawResult crawlerer.CrawlResult) {
+	c.res <- crawResult
+}
+
+// Scan method for crawler
+func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, maxDepth *int64, depth int64) {
+	defer c.wg.Done()
+	time.Sleep(5 * time.Second)
+
+	if depth > *maxDepth { //Проверяем то, что есть запас по глубине
+		return
+	}
+
+	fmt.Printf("Current depth: %d\n", depth)
 	// Crutch for have a little more live links
 	if !strings.HasPrefix(url, "http") {
 		lInd := strings.LastIndex(parentUrl, "/")
 		url = parentUrl[:lInd+1] + url
 	}
 
-	if depth <= 0 { //Проверяем то, что есть запас по глубине
-		return
-	}
 	c.mu.RLock()
 	_, ok := c.visited[url] //Проверяем, что мы ещё не смотрели эту страницу
 	c.mu.RUnlock()
@@ -59,12 +86,15 @@ func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, depth 
 			Title: page.GetTitle(),
 			Url:   url,
 		}
+
 		for _, link := range page.GetLinks() {
-			go c.Scan(ctx, link, url, depth-1) //На все полученные ссылки запускаем новую рутину сборки
+			c.wg.Add(1)
+			go c.Scan(ctx, link, url, maxDepth, depth+1) //На все полученные ссылки запускаем новую рутину сборки
 		}
 	}
 }
 
+// ChanResult method for put result in channel
 func (c *crawler) ChanResult() <-chan crawlerer.CrawlResult {
 	return c.res
 }

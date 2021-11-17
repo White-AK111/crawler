@@ -1,7 +1,8 @@
 app:
-  URL: "http://home.mcom.com/home/welcome.html"
+  URL: "https://golang.org"
   timeoutRequest: 10
   timeoutApp: 180
   maxDepth: 3
-  maxResults: 500
-  maxErrors: 500
+  maxResults: 5000
+  maxErrors: 5000
+  deltaDepth: 2
