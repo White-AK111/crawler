@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/kkyr/fig"
 	"log"
+	"sync/atomic"
 	"time"
 )
 
@@ -14,13 +15,13 @@ const (
 // Config structure for settings of application
 type Config struct {
 	App struct {
-		URL            string        `fig:"URL" default:"http://home.mcom.com/home/welcome.html"` // address of target source
-		TimeoutRequest time.Duration `fig:"timeoutRequest" default:"10"`                          // request timeout in seconds
-		TimeoutApp     time.Duration `fig:"timeoutApp" default:"180"`                             // application timeout in seconds
-		MaxDepth       uint64        `fig:"maxDepth" default:"3"`                                 // max depth for links
-		MaxResults     uint          `fig:"maxResults" default:"500"`                             // max result of links
-		MaxErrors      uint          `fig:"maxErrors" default:"500"`                              // max errors of request results
-		DeltaDepth     uint64        `fig:"deltaDepth" default:"2"`                               // delta for increment depth
+		URL            string        `fig:"URL" default:"https://golang.org"` // address of target source
+		TimeoutRequest time.Duration `fig:"timeoutRequest" default:"10"`      // request timeout in seconds
+		TimeoutApp     time.Duration `fig:"timeoutApp" default:"180"`         // application timeout in seconds
+		MaxDepth       int64         `fig:"maxDepth" default:"3"`             // max depth for links
+		MaxResults     uint          `fig:"maxResults" default:"500"`         // max result of links
+		MaxErrors      uint          `fig:"maxErrors" default:"500"`          // max errors of request results
+		DeltaDepth     int64         `fig:"deltaDepth" default:"2"`           // delta for increment depth
 	} `fig:"app"`
 }
 
@@ -37,4 +38,9 @@ func Init() (*Config, error) {
 	}
 
 	return &cfg, err
+}
+
+// ChangeMaxDepth increment depth by atomic
+func (c *Config) ChangeMaxDepth(delta int64) {
+	atomic.AddInt64(&c.App.MaxDepth, delta)
 }
