@@ -2,7 +2,6 @@ package crawler
 
 import (
 	"context"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/t0pep0/GB_best_go1/crawlerer"
 	"io"
@@ -51,13 +50,11 @@ func (c *crawler) ToChanResult(crawResult crawlerer.CrawlResult) {
 // Scan method for crawler
 func (c *crawler) Scan(ctx context.Context, url string, parentUrl string, maxDepth *int64, depth int64) {
 	defer c.wg.Done()
-	time.Sleep(5 * time.Second)
 
 	if depth > *maxDepth { //Проверяем то, что есть запас по глубине
 		return
 	}
 
-	fmt.Printf("Current depth: %d\n", depth)
 	// Crutch for have a little more live links
 	if !strings.HasPrefix(url, "http") {
 		lInd := strings.LastIndex(parentUrl, "/")
