@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Home page</title>
+</head>
+<body>
+<header>
+    <h1>Mock page</h1>
+</header>
+<nav>
+    <div>
+        {{if .Links}}
+            {{range .Links}}
+                <a href={{.URL}}>{{.Title}}</a>
+            {{end}}
+        {{end}}
+    </div>
+</nav>
+</body>
+</html>

@@ -33,8 +33,11 @@ func Init() (*Config, error) {
 	var cfg = Config{}
 	err := fig.Load(&cfg, fig.File(*useConfig))
 	if err != nil {
-		log.Fatalf("can't load configuration file: %s", err)
-		return nil, err
+		err = fig.Load(&cfg, fig.File("config.yaml"))
+		if err != nil {
+			log.Fatalf("can't load configuration file: %s", err)
+			return nil, err
+		}
 	}
 
 	return &cfg, err
