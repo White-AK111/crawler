@@ -23,14 +23,19 @@ func TestCrawler(t *testing.T) {
 	var depth int64 = 3
 	var start int64 = 1
 	url := "https://testStartURL.com"
-	resChan := make(<-chan crawlerer.CrawlResult)
+
+	// ineffassign
+	// delete resChan ineffectual assignment
+	// ineffectual assignment to resChan (ineffassign)
 
 	cr.On("Scan", ctx, url, url, &depth, start)
 	cr.On("ChanResult").Return(make(<-chan crawlerer.CrawlResult))
 	cr.On("ToChanResult", crawlRes)
 
 	cr.Scan(ctx, url, url, &depth, start)
-	resChan = cr.ChanResult()
+
+	// add assignment ":="
+	resChan := cr.ChanResult()
 	cr.ToChanResult(crawlRes)
 	assert.NotNil(t, resChan, "Got nil result chan.")
 	require.NotZero(t, cr, "Error on check contract in crawler interface.")

@@ -1,0 +1,50 @@
+run:
+  concurrency: 2
+
+  timeout: 1m
+
+  issues-exit-code: 1
+
+  tests: true
+
+  skip-dirs-use-default: true
+
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - goconst
+    - funlen
+    - bodyclose
+    - errcheck
+    - deadcode
+    - exportloopref
+    - gocyclo
+    - lll
+    - misspell
+    - aligncheck
+    - Copyfighter
+    - maligned
+    - prealloc
+    - rangerdanger
+    - go-mnd
+    - tarp
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  funlen:
+    lines: 100
+    statements: 50
+  gocyclo:
+    min-complexity: 15
+  lll:
+    line-length: 150
+  misspell:
+    locale: US
+
