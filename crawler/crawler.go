@@ -2,13 +2,14 @@ package crawler
 
 import (
 	"context"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/t0pep0/GB_best_go1/crawlerer"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/t0pep0/GB_best_go1/crawlerer"
 )
 
 // crawler struct

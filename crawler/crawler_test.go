@@ -3,13 +3,14 @@ package crawler
 import (
 	"bytes"
 	"context"
-	"github.com/stretchr/testify/assert"
-	"github.com/t0pep0/GB_best_go1/crawlerer"
-	"github.com/t0pep0/GB_best_go1/crawlerer/mocks"
 	"html/template"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/t0pep0/GB_best_go1/crawlerer"
+	"github.com/t0pep0/GB_best_go1/crawlerer/mocks"
 )
 
 func TestNewRequester(t *testing.T) {

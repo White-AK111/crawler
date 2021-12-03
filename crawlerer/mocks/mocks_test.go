@@ -2,10 +2,11 @@ package mocks
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/t0pep0/GB_best_go1/crawlerer"
-	"testing"
 )
 
 // TestCrawler contracts of Crawler interface

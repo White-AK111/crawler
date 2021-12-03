@@ -2,19 +2,37 @@ package main
 
 import (
 	"context"
-	"github.com/t0pep0/GB_best_go1/config"
-	"github.com/t0pep0/GB_best_go1/crawler"
-	"github.com/t0pep0/GB_best_go1/crawlerer"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/t0pep0/GB_best_go1/config"
+	"github.com/t0pep0/GB_best_go1/crawler"
+	"github.com/t0pep0/GB_best_go1/crawlerer"
+)
+
+const (
+	usageConfig = "use this flag for set path to configuration file"
+)
+
+var (
+	VERSION   = "UNKNOWN"
+	COMMIT    = "UNKNOWN"
+	BRANCH    = "UNKNOWN"
+	USECONFIG = "config/config.yaml"
 )
 
 func main() {
+	fmt.Printf("version: %s\n", VERSION)
+	fmt.Printf("last commit: %s\n", COMMIT)
+	fmt.Printf("current branch: %s\n", BRANCH)
+
 	// Load config file
-	cfg, err := config.Init()
+	cfg, err := config.InitConfig(&USECONFIG)
 	if err != nil {
 		log.Fatalf("Can't load configuration file: %s", err)
 	}
@@ -66,6 +84,12 @@ func main() {
 			}
 		}
 	}
+}
+
+// init func, parse flags
+func init() {
+	flag.StringVar(&USECONFIG, "path", "config/config.yaml", usageConfig)
+	flag.Parse()
 }
 
 // processResult get results of process
