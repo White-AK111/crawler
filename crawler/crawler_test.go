@@ -136,7 +136,7 @@ func TestGet(t *testing.T) {
 		}
 	})
 
-	addr := "localhost:8091"
+	addr := ":8080"
 	url := "http://" + addr + "/home/"
 	server := &http.Server{Addr: addr, Handler: nil}
 	go func() {
