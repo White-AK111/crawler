@@ -47,4 +47,3 @@ linters-settings:
     line-length: 150
   misspell:
     locale: US
-

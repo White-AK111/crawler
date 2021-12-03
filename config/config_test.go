@@ -6,7 +6,8 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	cfg, err := Init()
+	plug := "config.yaml"
+	cfg, err := InitConfig(&plug)
 	if cfg == nil {
 		log.Fatal("error: can't load configuration")
 	}

@@ -3,13 +3,15 @@ package crawler
 import (
 	"bytes"
 	"context"
+	"html/template"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/t0pep0/GB_best_go1/crawlerer"
 	"github.com/t0pep0/GB_best_go1/crawlerer/mocks"
-	"html/template"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func TestNewRequester(t *testing.T) {
@@ -109,7 +111,8 @@ func TestChanResult(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	http.HandleFunc("/home/", func(w http.ResponseWriter, r *http.Request) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		type Link struct {
 			URL   string
 			Title string
@@ -133,25 +136,13 @@ func TestGet(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Error on execute template: %v \n", err)
 		}
-	})
-
-	addr := "localhost:8080"
-	url := "http://" + addr + "/home/"
-	server := &http.Server{Addr: addr, Handler: nil}
-	go func() {
-		err := server.ListenAndServe()
-		if err != nil {
-			t.Errorf("Error on start server: %v \n", err)
-			return
-		}
-	}()
-
-	time.Sleep(3 * time.Second)
+	}))
+	defer ts.Close()
 
 	r := NewRequester(3 * time.Second)
 	ctx := context.Background()
 
-	pg, err := r.Get(ctx, url)
+	pg, err := r.Get(ctx, ts.URL)
 	if err != nil {
 		t.Fatalf("Error on get page: %v \n", err)
 	}

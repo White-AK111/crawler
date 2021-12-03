@@ -1,15 +1,11 @@
 package config
 
 import (
-	"flag"
-	"github.com/kkyr/fig"
 	"log"
 	"sync/atomic"
 	"time"
-)
 
-const (
-	usageConfig = "use this flag for set path to configuration file"
+	"github.com/kkyr/fig"
 )
 
 // Config structure for settings of application
@@ -25,11 +21,8 @@ type Config struct {
 	} `fig:"app"`
 }
 
-// Init function for initialize Config structure
-func Init() (*Config, error) {
-	useConfig := flag.String("path", "config/config.yaml", usageConfig)
-	flag.Parse()
-
+// InitConfig function for initialize Config structure
+func InitConfig(useConfig *string) (*Config, error) {
 	var cfg = Config{}
 	err := fig.Load(&cfg, fig.File(*useConfig))
 	if err != nil {
