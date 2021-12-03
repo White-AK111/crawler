@@ -50,20 +50,21 @@ func TestScan(t *testing.T) {
 	var maxResult, maxErrors = 10, 5
 	doFor := true
 	for doFor {
-		select {
-		case msg := <-cr.ChanResult():
-			if msg.Err != nil {
-				maxErrors--
-				if maxErrors <= 0 {
-					doFor = false
-				}
-			} else if len(msg.Info) > 0 {
+		// gosimple
+		// delete select statement
+		// S1000: should use a simple channel send/receive instead of `select` with a single case (gosimple)
+		msg := <-cr.ChanResult()
+		if msg.Err != nil {
+			maxErrors--
+			if maxErrors <= 0 {
 				doFor = false
-			} else {
-				maxResult--
-				if maxResult <= 0 {
-					doFor = false
-				}
+			}
+		} else if len(msg.Info) > 0 {
+			doFor = false
+		} else {
+			maxResult--
+			if maxResult <= 0 {
+				doFor = false
 			}
 		}
 	}
@@ -181,8 +182,20 @@ func TestNewPage(t *testing.T) {
 
 	var buffer bytes.Buffer
 	err = tmpl.Execute(&buffer, &templateData{Links: links})
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on execute template: %v \n", err)
+	}
 
 	pg, err := NewPage(&buffer)
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on create new page struct: %v \n", err)
+	}
 
 	assert.NotNil(t, pg, "Get nil page.")
 }
@@ -210,8 +223,20 @@ func TestGetTitle(t *testing.T) {
 
 	var buffer bytes.Buffer
 	err = tmpl.Execute(&buffer, &templateData{Links: links})
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on execute template: %v \n", err)
+	}
 
 	pg, err := NewPage(&buffer)
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on create new page struct: %v \n", err)
+	}
 
 	exTitle := "Home page"
 	gotTitle := pg.GetTitle()
@@ -242,8 +267,20 @@ func TestGetLinks(t *testing.T) {
 
 	var buffer bytes.Buffer
 	err = tmpl.Execute(&buffer, &templateData{Links: links})
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on execute template: %v \n", err)
+	}
 
 	pg, err := NewPage(&buffer)
+	// ineffassign
+	// add error handling
+	// ineffectual assignment to err (ineffassign)
+	if err != nil {
+		t.Fatalf("Error on create new page struct: %v \n", err)
+	}
 
 	exLinks := []string{"https://childURL1.com", "https://childURL2.com", "https://childURL3.com"}
 	gotLinks := pg.GetLinks()

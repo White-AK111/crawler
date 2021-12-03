@@ -127,7 +127,10 @@ func (r requester) Get(ctx context.Context, url string) (crawlerer.Page, error) 
 		}
 		return page, nil
 	}
-	return nil, nil
+
+	// govet
+	// delete unreachable return
+	// unreachable: unreachable code (govet)
 }
 
 type page struct {

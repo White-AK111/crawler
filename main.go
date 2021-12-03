@@ -28,7 +28,10 @@ func main() {
 	go cr.Scan(ctxCurr, cfg.App.URL, cfg.App.URL, &cfg.App.MaxDepth, 1) // Запускаем краулер в отдельной рутине
 	go processResult(ctxCurr, cancelCurr, cr, cfg)                      // Обрабатываем результаты в отдельной рутине
 
-	sigCh := make(chan os.Signal)                                          // Создаем канал для приема сигналов
+	// govet
+	// add buffer to channel
+	// sigchanyzer: misuse of unbuffered os.Signal channel as argument to signal.Notify (govet)
+	sigCh := make(chan os.Signal, 1)                                       // Создаем канал для приема сигналов
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGUSR1, syscall.SIGUSR2) // Подписываемся на сигнал SIGINT
 	for {
 		select {
